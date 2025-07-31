@@ -1,0 +1,41 @@
+-- Fluent UI Library (doğru versiyon)
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+btns:Button("Anticheat Bypasser", function()
+    loadstring(game:HttpGet("https://freenote.biz/raw/vyzuuBLBkX"))()
+    DiscordLib:Notification("Notification", "Anticheat Bypasser activated!", "Okay!")
+end)
+
+SPage:CreateToggle("Auto Goal [Autofarm]", "Auto Goal [Autofarn]. Use At Your Own Risk", function(arg)
+if arg then
+_G.AUTOFARM = true
+while _G.AUTOFARM do
+wait()
+local HRPRotation = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Rotation
+local GoalPST = game.Workspace.TPSSystem.TPS.CFrame
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = HRPRotation + GoalPST.Position
+    local A_1 = game:GetService("Workspace").TPSSystem.TPS
+local A_2 = game:GetService("Players").LocalPlayer.Character.Head
+local Event = game:GetService("Workspace").FE.Actions.Tackle
+Event:FireServer(A_1, A_2)
+
+local Events2 = game:GetService("Workspace").FE.Kick.RemoteEvent2
+Events2:FireServer()
+if game.Players.LocalPlayer.TeamColor == BrickColor.new("Bright red") then
+game.Players.LocalPlayer.PlayerGui.LockScript.SetLock.Value = true
+game.Workspace.CurrentCamera.CFrame = CFrame.lookAt(game.Workspace.CurrentCamera.CFrame.Position + Vector3.new(0, 45, 0),game.Workspace.BlueGoal.Part.Position)
+end
+if game.Players.LocalPlayer.TeamColor == BrickColor.new("Bright blue") then
+game.Players.LocalPlayer.PlayerGui.LockScript.SetLock.Value = true
+game.Workspace.CurrentCamera.CFrame = CFrame.lookAt(game.Workspace.CurrentCamera.CFrame.Position + Vector3.new(0, 45, 0),game.Workspace.RedGoal.Part.Position)
+end
+end
+    else
+_G.AUTOFARM = false
+wait(1)
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Lines.Line12.CFrame
+game.Players.LocalPlayer.PlayerGui.LockScript.SetLock.Value = false
+end
+end)
