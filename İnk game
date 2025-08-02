@@ -1,0 +1,280 @@
+-- Rayfield Ink Game Script Hub
+
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Ink Game Script Hub",
+    LoadingTitle = "Ink Game Script Yükleniyor...",
+    LoadingSubtitle = "Efecan tarafından hazırlanmıştır",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "InkGameHub",
+        FileName = "Config"
+    },
+    Discord = {
+        Enabled = false,
+        Invite = "",
+        RememberJoins = true
+    }
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- ESP Ayarları
+local espEnabled = false
+local ESPFolder = Instance.new("Folder", game.CoreGui)
+ESPFolder.Name = "ESPFolder"
+
+local function createESPForPlayer(player)
+    if player == LocalPlayer then return end
+    local function onCharacterAdded(char)
+        local hrp = char:WaitForChild("HumanoidRootPart", 5)
+        if not hrp then return end
+
+        if ESPFolder:FindFirstChild(player.Name) then
+            ESPFolder[player.Name]:Destroy()
+        end
+
+        local playerFolder = Instance.new("Folder")
+        playerFolder.Name = player.Name
+        playerFolder.Parent = ESPFolder
+
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "PlayerESP"
+        billboard.Adornee = hrp
+        billboard.Size = UDim2.new(0, 150, 0, 40)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = playerFolder
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.new(0, 1, 0)
+        textLabel.TextStrokeTransparency = 0
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextSize = 14
+        textLabel.Text = player.Name
+        textLabel.Parent = billboard
+    end
+
+    player.CharacterAdded:Connect(onCharacterAdded)
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+end
+
+local function removeAllESP()
+    for _, child in pairs(ESPFolder:GetChildren()) do
+        child:Destroy()
+    end
+end
+
+local function toggleESP(state)
+    espEnabled = state
+    if espEnabled then
+        for _, p in pairs(Players:GetPlayers()) do
+            createESPForPlayer(p)
+        end
+        Players.PlayerAdded:Connect(function(p)
+            if espEnabled then
+                createESPForPlayer(p)
+            end
+        end)
+    else
+        removeAllESP()
+    end
+end
+
+-- Ölümsüzlük
+local immortalityEnabled = false
+local function setImmortality(enable)
+    immortalityEnabled = enable
+    if enable then
+        local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local hum = char:WaitForChild("Humanoid")
+        coroutine.wrap(function()
+            while immortalityEnabled do
+                if hum.Health < hum.MaxHealth then
+                    hum.Health = hum.MaxHealth
+                end
+                RunService.Heartbeat:Wait()
+            end
+        end)()
+    end
+end
+
+-- Red Light Green Light Otomatik Bitirme
+local redLightRunning = false
+local function RedLightGreenLight()
+    if redLightRunning then return end
+    redLightRunning = true
+    print("Red Light Green Light başladı!")
+    setImmortality(true)
+
+    local lightStatus = "Green"
+    local seconds = 5
+
+    coroutine.wrap(function()
+        while redLightRunning do
+            if lightStatus == "Green" then
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    for i = 1, seconds*20 do
+                        if not redLightRunning then break end
+                        char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,0.3)
+                        wait(0.05)
+                    end
+                end
+                lightStatus = "Red"
+            else
+                lightStatus = "Green"
+            end
+            wait(seconds)
+        end
+        setImmortality(false)
+    end)()
+end
+
+local function stopRedLight()
+    redLightRunning = false
+    setImmortality(false)
+    print("Red Light Green Light durduruldu.")
+end
+
+-- Dalgona Otomatik Kesme
+local dalgonaRunning = false
+local function DalgonaChallenge()
+    if dalgonaRunning then return end
+    dalgonaRunning = true
+    print("Dalgona Challenge başladı!")
+
+    coroutine.wrap(function()
+        while dalgonaRunning do
+            local char = LocalPlayer.Character
+            if not char then break end
+            local tool = char:FindFirstChildOfClass("Tool") or LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+            if tool and tool:FindFirstChild("Handle") then
+                for i = 1, 20 do
+                    if not dalgonaRunning then break end
+                    tool.Handle.CFrame = tool.Handle.CFrame * CFrame.new(0, 0, 0.1)
+                    wait(0.05)
+                    tool.Handle.CFrame = tool.Handle.CFrame * CFrame.new(0, 0, -0.1)
+                    wait(0.05)
+                end
+            end
+            wait(1)
+        end
+    end)()
+end
+
+local function stopDalgona()
+    dalgonaRunning = false
+    print("Dalgona Challenge durduruldu.")
+end
+
+-- Tug of War Otomatik Çekme
+local tugRunning = false
+local function TugOfWar()
+    if tugRunning then return end
+    tugRunning = true
+    print("Tug of War başladı!")
+
+    coroutine.wrap(function()
+        while tugRunning do
+            local char = LocalPlayer.Character
+            if not char then break end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, -0.15)
+            end
+            wait(0.05)
+        end
+    end)()
+end
+
+local function stopTug()
+    tugRunning = false
+    print("Tug of War durduruldu.")
+end
+
+local function stopAllGames()
+    stopRedLight()
+    stopDalgona()
+    stopTug()
+    setImmortality(false)
+    print("Tüm oyun modları durduruldu.")
+end
+
+-- Rayfield GUI Butonları
+
+Window:Toggle({
+    Name = "Adam Görme (ESP)",
+    CurrentValue = false,
+    Flag = "espToggle",
+    Callback = function(value)
+        toggleESP(value)
+    end
+})
+
+Window:Toggle({
+    Name = "Ölümsüzlük",
+    CurrentValue = false,
+    Flag = "immortalityToggle",
+    Callback = function(value)
+        setImmortality(value)
+    end
+})
+
+Window:Toggle({
+    Name = "Red Light Green Light Otomatik",
+    CurrentValue = false,
+    Flag = "redLightToggle",
+    Callback = function(value)
+        if value then
+            RedLightGreenLight()
+        else
+            stopRedLight()
+        end
+    end
+})
+
+Window:Toggle({
+    Name = "Dalgona Otomatik Kesme",
+    CurrentValue = false,
+    Flag = "dalgonaToggle",
+    Callback = function(value)
+        if value then
+            DalgonaChallenge()
+        else
+            stopDalgona()
+        end
+    end
+})
+
+Window:Toggle({
+    Name = "Tug of War Otomatik",
+    CurrentValue = false,
+    Flag = "tugToggle",
+    Callback = function(value)
+        if value then
+            TugOfWar()
+        else
+            stopTug()
+        end
+    end
+})
+
+Window:Button({
+    Name = "Tüm Oyunları Durdur",
+    Callback = function()
+        stopAllGames()
+        -- GUI toggle butonlarını kapat
+        Rayfield:Notify({
+            Title = "Durum",
+            Content = "Tüm oyun modları durduruldu.",
+            Duration = 3
+        })
+    end
+})
