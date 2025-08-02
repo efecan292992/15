@@ -1,0 +1,269 @@
+-- Ink Game Script Hub v6.0
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = Players.LocalPlayer
+
+-- Ana GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "InkGameGUI"
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 220, 0, 360)
+MainFrame.Position = UDim2.new(0, 20, 0, 100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundTransparency = 1
+Title.Text = "Ink Game Script Hub"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 18
+Title.Parent = MainFrame
+
+local function createToggleButton(name, posY)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -20, 0, 35)
+	btn.Position = UDim2.new(0, 10, 0, posY)
+	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.SourceSansSemibold
+	btn.TextSize = 16
+	btn.Text = name .. ": Kapalı"
+	btn.Parent = MainFrame
+	return btn
+end
+
+-- ESP Modülü
+local espEnabled = false
+local ESPFolder = Instance.new("Folder")
+ESPFolder.Name = "ESPFolder"
+ESPFolder.Parent = game.CoreGui
+
+local function createESPForPlayer(player)
+	if player == LocalPlayer then return end
+	local function onCharacterAdded(char)
+		local hrp = char:WaitForChild("HumanoidRootPart", 5)
+		local hum = char:WaitForChild("Humanoid", 5)
+		if not hrp or not hum then return end
+
+		if ESPFolder:FindFirstChild(player.Name) then
+			ESPFolder[player.Name]:Destroy()
+		end
+
+		local playerFolder = Instance.new("Folder")
+		playerFolder.Name = player.Name
+		playerFolder.Parent = ESPFolder
+
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "PlayerESP"
+		billboard.Adornee = hrp
+		billboard.Size = UDim2.new(0, 150, 0, 40)
+		billboard.AlwaysOnTop = true
+		billboard.Parent = playerFolder
+
+		local textLabel = Instance.new("TextLabel")
+		textLabel.Size = UDim2.new(1, 0, 1, 0)
+		textLabel.BackgroundTransparency = 1
+		textLabel.TextColor3 = Color3.new(1, 0, 0)
+		textLabel.TextStrokeTransparency = 0
+		textLabel.Font = Enum.Font.SourceSansBold
+		textLabel.TextSize = 14
+		textLabel.Text = player.Name
+		textLabel.Parent = billboard
+	end
+
+	player.CharacterAdded:Connect(onCharacterAdded)
+	if player.Character then
+		onCharacterAdded(player.Character)
+	end
+end
+
+local function removeAllESP()
+	for _, child in pairs(ESPFolder:GetChildren()) do
+		child:Destroy()
+	end
+end
+
+local function toggleESP()
+	espEnabled = not espEnabled
+	if espEnabled then
+		for _, p in pairs(Players:GetPlayers()) do
+			createESPForPlayer(p)
+		end
+		Players.PlayerAdded:Connect(function(p)
+			if espEnabled then
+				createESPForPlayer(p)
+			end
+		end)
+	else
+		removeAllESP()
+	end
+end
+
+-- Envanter Görüntüleme Modülü
+local inventoryEnabled = false
+
+local function showInventory()
+	local msg = "📦 Envanter:\n"
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr.Character then
+			local invText = ""
+			for _, tool in pairs(plr.Backpack:GetChildren()) do
+				invText = invText .. tool.Name .. ", "
+			end
+			for _, tool in pairs(plr.Character:GetChildren()) do
+				if tool:IsA("Tool") then
+					invText = invText .. tool.Name .. ", "
+				end
+			end
+			if invText == "" then
+				invText = "Boş"
+			end
+			msg = msg .. plr.Name .. ": " .. invText .. "\n"
+		end
+	end
+	StarterGui:SetCore("SendNotification", {
+		Title = "Envanter Listesi",
+		Text = msg,
+		Duration = 7
+	})
+end
+
+local function toggleInventory()
+	inventoryEnabled = not inventoryEnabled
+	if inventoryEnabled then
+		showInventory()
+	end
+end
+
+-- Ink Game Modülleri
+
+-- Modül 1: Red Light Green Light
+local redLightRunning = false
+local function RedLightGreenLight()
+	if redLightRunning then return end
+	redLightRunning = true
+
+	print("Red Light Green Light başladı!")
+
+	local lightStatus = "Green"
+	local seconds = 5
+
+	coroutine.wrap(function()
+		while redLightRunning do
+			print(lightStatus .. " ışığı açık!")
+			if lightStatus == "Green" then
+				lightStatus = "Red"
+			else
+				lightStatus = "Green"
+			end
+			wait(seconds)
+		end
+	end)()
+end
+
+local function stopRedLight()
+	redLightRunning = false
+	print("Red Light Green Light durduruldu.")
+end
+
+-- Modül 2: Dalgona Challenge
+local dalgonaRunning = false
+local function DalgonaChallenge()
+	if dalgonaRunning then return end
+	dalgonaRunning = true
+	print("Dalgona Challenge başladı!")
+	wait(10)
+	dalgonaRunning = false
+	print("Dalgona Challenge bitti!")
+end
+
+-- Modül 3: Tug of War
+local tugRunning = false
+local function TugOfWar()
+	if tugRunning then return end
+	tugRunning = true
+	print("Tug of War başladı!")
+	wait(10)
+	tugRunning = false
+	print("Tug of War bitti!")
+end
+
+-- Oyunları Durdur
+local function stopAllGames()
+	redLightRunning = false
+	dalgonaRunning = false
+	tugRunning = false
+	print("Tüm oyun modları durduruldu.")
+end
+
+-- GUI Butonları
+local ESPButton = createToggleButton("Adam Görme (ESP)", 50)
+local InvButton = createToggleButton("Envanter Göster", 100)
+local RedLightButton = createToggleButton("Red Light Green Light", 150)
+local DalgonaButton = createToggleButton("Dalgona Challenge", 200)
+local TugButton = createToggleButton("Tug of War", 250)
+local StopGamesButton = createToggleButton("Oyunları Durdur", 300)
+
+ESPButton.MouseButton1Click:Connect(function()
+	toggleESP()
+	if espEnabled then
+		ESPButton.Text = "Adam Görme (ESP): Açık"
+	else
+		ESPButton.Text = "Adam Görme (ESP): Kapalı"
+	end
+end)
+
+InvButton.MouseButton1Click:Connect(function()
+	toggleInventory()
+	if inventoryEnabled then
+		InvButton.Text = "Envanter Göster: Açık"
+	else
+		InvButton.Text = "Envanter Göster: Kapalı"
+	end
+end)
+
+RedLightButton.MouseButton1Click:Connect(function()
+	if not redLightRunning then
+		RedLightGreenLight()
+		RedLightButton.Text = "Red Light Green Light: Çalışıyor"
+	else
+		stopRedLight()
+		RedLightButton.Text = "Red Light Green Light: Kapalı"
+	end
+end)
+
+DalgonaButton.MouseButton1Click:Connect(function()
+	if not dalgonaRunning then
+		DalgonaChallenge()
+		DalgonaButton.Text = "Dalgona Challenge: Çalışıyor"
+	else
+		dalgonaRunning = false
+		DalgonaButton.Text = "Dalgona Challenge: Kapalı"
+	end
+end)
+
+TugButton.MouseButton1Click:Connect(function()
+	if not tugRunning then
+		TugOfWar()
+		TugButton.Text = "Tug of War: Çalışıyor"
+	else
+		tugRunning = false
+		TugButton.Text = "Tug of War: Kapalı"
+	end
+end)
+
+StopGamesButton.MouseButton1Click:Connect(function()
+	stopAllGames()
+	RedLightButton.Text = "Red Light Green Light: Kapalı"
+	DalgonaButton.Text = "Dalgona Challenge: Kapalı"
+	TugButton.Text = "Tug of War: Kapalı"
+end)
+
+print("Ink Game Script Hub hazır!")
